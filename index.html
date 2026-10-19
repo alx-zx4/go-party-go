@@ -989,7 +989,7 @@ nav.scrolled .nav-links a:hover{color:var(--dark)}
 
 .servicios-grid{
   display:grid;grid-template-columns:repeat(4,1fr);
-  grid-auto-rows:230px;grid-auto-flow:dense;gap:18px;
+  grid-auto-rows:230px;grid-auto-flow:row;gap:18px;
 }
 .servicio-card{
   position:relative;border-radius:18px;overflow:hidden;isolation:isolate;
@@ -3124,10 +3124,14 @@ var INV_DIR   = 'Plaza Linda Vista, Av. Churubusco 1105';
   function v(n,f){ var x=(cs.getPropertyValue(n)||'').trim(); return x||f; }
   var C={primary:v('--primary','#CF4208'),accent:v('--accent','#13B5C7'),accent2:v('--accent2','#FF6FB5'),dark:v('--dark','#43189A'),cream:v('--cream','#FFF6EA'),white:'#FFFFFF'};
   var TEMAS=[
-    {a:C.primary,b:C.dark,   ink:C.white,c1:C.accent2,c2:C.accent},
-    {a:C.accent, b:C.primary,ink:C.white,c1:C.cream,  c2:C.accent2},
-    {a:C.accent2,b:C.dark,   ink:C.white,c1:C.accent, c2:C.primary},
-    {a:C.cream,  b:C.accent2,ink:C.dark, c1:C.primary,c2:C.accent}
+    {a:C.primary,b:C.dark,   ink:C.white,c1:C.accent2,c2:C.accent, estilo:'confeti'},
+    {a:C.accent, b:C.primary,ink:C.white,c1:C.cream,  c2:C.accent2,estilo:'flores'},
+    {a:C.accent2,b:C.dark,   ink:C.white,c1:C.accent, c2:C.primary,estilo:'carritos'},
+    {a:C.cream,  b:C.accent2,ink:C.dark, c1:C.primary,c2:C.accent, estilo:'puntos'},
+    {a:C.dark,   b:C.primary,ink:C.white,c1:C.cream,  c2:C.accent, estilo:'estrellas'},
+    {a:C.primary,b:C.accent2,ink:C.white,c1:C.dark,   c2:C.cream,  estilo:'globos'},
+    {a:C.accent, b:C.dark,   ink:C.white,c1:C.cream,  c2:C.primary,estilo:'corazones'},
+    {a:C.cream,  b:C.primary,ink:C.dark, c1:C.accent, c2:C.accent2,estilo:'banderines'}
   ];
   var temaIdx=0;
   var MESES=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
@@ -3137,6 +3141,60 @@ var INV_DIR   = 'Plaza Linda Vista, Av. Churubusco 1105';
   function fechaTexto(val){ if(!val) return ''; var p=val.split('-'); var d=new Date(parseInt(p[0]),parseInt(p[1])-1,parseInt(p[2])); return DIAS[d.getDay()]+' '+parseInt(p[2],10)+' de '+MESES[parseInt(p[1])-1]; }
   function fit(txt,weight,maxW,minS,maxS){ var sz=maxS; do{ ctx.font=weight+' '+sz+'px "Baloo 2","Trebuchet MS",sans-serif'; if(ctx.measureText(txt).width<=maxW) break; sz-=4; }while(sz>minS); return sz; }
 
+  /* ── 8 motivos decorativos, uno por tema — todos vector/canvas puro ── */
+  var SPOTS=[[95,130,26],[210,85,14],[W-115,155,30],[W-75,320,16],[130,H-170,22],[W-150,H-130,28],[W-95,H-330,14],[75,H-380,17]];
+  function porPunto(fn){ for(var i=0;i<SPOTS.length;i++){ var p=SPOTS[i]; fn(p[0],p[1],p[2],i%2); } }
+  var MOTIVOS={
+    confeti:function(c1,c2){ porPunto(function(x,y,r,alt){ ctx.globalAlpha=.9; ctx.fillStyle=alt?c1:c2; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill(); }); ctx.globalAlpha=1; },
+    flores:function(c1,c2){ porPunto(function(x,y,r,alt){
+      var color=alt?c1:c2, pr=r*0.62;
+      ctx.globalAlpha=.9; ctx.fillStyle=color;
+      for(var p=0;p<5;p++){ var ang=p*(Math.PI*2/5);
+        ctx.beginPath(); ctx.ellipse(x+Math.cos(ang)*r*0.5,y+Math.sin(ang)*r*0.5,pr*0.55,pr,ang,0,Math.PI*2); ctx.fill(); }
+      ctx.fillStyle='rgba(255,255,255,.85)'; ctx.beginPath(); ctx.arc(x,y,r*0.3,0,Math.PI*2); ctx.fill();
+      ctx.globalAlpha=1; }); },
+    carritos:function(c1,c2){ porPunto(function(x,y,r,alt){
+      var color=alt?c1:c2, w=r*2.6, h=r*1.1;
+      ctx.globalAlpha=.9; ctx.fillStyle=color;
+      ctx.fillRect(x-w/2,y-h*0.35,w,h*0.5);
+      ctx.fillRect(x-w*0.22,y-h*0.75,w*0.46,h*0.42);
+      ctx.fillStyle='rgba(43,24,84,.55)';
+      ctx.beginPath(); ctx.arc(x-w*0.27,y+h*0.17,h*0.26,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(x+w*0.27,y+h*0.17,h*0.26,0,Math.PI*2); ctx.fill();
+      ctx.globalAlpha=1; }); },
+    puntos:function(c1,c2){ porPunto(function(x,y,r,alt){ ctx.globalAlpha=.55; ctx.fillStyle=alt?c1:c2; ctx.beginPath(); ctx.arc(x,y,r*1.5,0,Math.PI*2); ctx.fill(); }); ctx.globalAlpha=1; },
+    estrellas:function(c1,c2){ porPunto(function(x,y,r,alt){
+      var color=alt?c1:c2, outer=r*0.95, inner=outer*0.42;
+      ctx.globalAlpha=.9; ctx.fillStyle=color; ctx.beginPath();
+      for(var i=0;i<10;i++){ var rad=(i%2===0)?outer:inner, ang=(Math.PI/5)*i-Math.PI/2;
+        var px=x+Math.cos(ang)*rad, py=y+Math.sin(ang)*rad;
+        if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py); }
+      ctx.closePath(); ctx.fill(); ctx.globalAlpha=1; }); },
+    globos:function(c1,c2){ porPunto(function(x,y,r,alt){
+      var color=alt?c1:c2;
+      ctx.globalAlpha=.9; ctx.fillStyle=color;
+      ctx.beginPath(); ctx.ellipse(x,y,r*0.72,r*0.95,0,0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(x,y+r*0.9); ctx.quadraticCurveTo(x+8,y+r*1.3,x,y+r*1.6); ctx.stroke();
+      ctx.globalAlpha=1; }); },
+    corazones:function(c1,c2){ porPunto(function(x,y,r,alt){
+      var color=alt?c1:c2, hr=r*0.55;
+      ctx.globalAlpha=.9; ctx.fillStyle=color; ctx.beginPath();
+      ctx.arc(x-hr,y-hr*0.4,hr,Math.PI,0);
+      ctx.arc(x+hr,y-hr*0.4,hr,Math.PI,0);
+      ctx.lineTo(x,y+hr*1.7); ctx.closePath(); ctx.fill(); ctx.globalAlpha=1; }); },
+    banderines:function(c1,c2){
+      var n=9, segW=W/n, triH=34, y0=16;
+      for(var i=0;i<n;i++){
+        ctx.globalAlpha=.85; ctx.fillStyle=(i%2?c1:c2);
+        var cx=segW*i+segW/2;
+        ctx.beginPath(); ctx.moveTo(cx-segW*0.35,y0); ctx.lineTo(cx+segW*0.35,y0); ctx.lineTo(cx,y0+triH); ctx.closePath(); ctx.fill();
+      }
+      ctx.globalAlpha=1; ctx.strokeStyle='rgba(255,255,255,.5)'; ctx.lineWidth=2;
+      ctx.beginPath(); ctx.moveTo(0,y0); ctx.lineTo(W,y0); ctx.stroke();
+    }
+  };
+
   function draw(){
     var nombre=(document.getElementById('inv-nombre').value||'').trim()||'Nombre';
     var edad=(document.getElementById('inv-edad').value||'').trim();
@@ -3145,8 +3203,7 @@ var INV_DIR   = 'Plaza Linda Vista, Av. Churubusco 1105';
     var t=TEMAS[temaIdx];
     var g=ctx.createLinearGradient(0,0,W,H); g.addColorStop(0,t.a); g.addColorStop(1,t.b);
     ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
-    var dots=[[95,130,26],[210,85,14],[W-115,155,30],[W-75,320,16],[130,H-170,22],[W-150,H-130,28],[W-95,H-330,14],[75,H-380,17]];
-    for(var i2=0;i2<dots.length;i2++){ ctx.beginPath(); ctx.fillStyle=(i2%2?t.c1:t.c2); ctx.globalAlpha=.9; ctx.arc(dots[i2][0],dots[i2][1],dots[i2][2],0,Math.PI*2); ctx.fill(); }
+    (MOTIVOS[t.estilo]||MOTIVOS.confeti)(t.c1,t.c2);
     ctx.globalAlpha=1; ctx.textAlign='center'; ctx.fillStyle=t.ink;
     ctx.font='700 46px "Baloo 2","Trebuchet MS",sans-serif'; ctx.fillText('¡Te invito a mi fiesta!',W/2,310);
     var ns=fit(nombre.toUpperCase(),'800',W-170,64,150);
